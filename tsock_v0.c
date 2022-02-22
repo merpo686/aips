@@ -95,7 +95,7 @@ int create_local_socket(int port,int protocol){
 
 void fc_source(int lg,int port,char* adr, int protocol, int nb_message){
 
-	printf("SOURCE: lg_mesg_emis=%d, port=%d, nb_envois=%d, TP=%d, dest=%s\n",lg,port,30,protocol,adr);
+	printf("SOURCE: lg_mesg_emis=%d, port=%d, nb_envois=%d, TP=%d, dest=%s\n",lg,port,nb_message,protocol,adr);
 	int sock;
 	if (protocol==1)
 	{
@@ -178,7 +178,6 @@ void main (int argc, char **argv)
 	extern int optind;
 	int lg = 30;
 	int port = atoi(argv[argc-1]);
-	port = htons(port);
 	char *adr = (argv[argc-2]);
 	int nb_message = 10; /* Nb de messages à envoyer ou à recevoir, par défaut : 10 en émission, infini en réception */
 	int source = -1 ; /* 0=puits, 1=source */
