@@ -23,7 +23,7 @@ void construire_message(char *message, char motif, int lg, int nb_message)
 	int i;
 	int nb=nb_message;
 	int fact = 10000;
-	char nbs[10]="1234567890";
+	char nbs[10]="0123456789";
 	for (i=0;i<lg;i++) 
 	{
 		if (i>4)
@@ -32,9 +32,10 @@ void construire_message(char *message, char motif, int lg, int nb_message)
 		}
 		else 
 		{
-			if (nb/fact==0 )
+			if ((nb/fact)==0 && nb!=0)
 			{
 				message[i]='-';
+
 			}
 			else 
 			{
@@ -50,11 +51,12 @@ void construire_message(char *message, char motif, int lg, int nb_message)
 void afficher_message(char *message, int lg) 
 {
 	int i;
-	printf("message construit : ");
+	printf("[");
 	for (i=0;i<lg;i++) 
 	{
 		printf("%c", message[i]); 
 	}
+	printf("]");
 	printf("\n");
 }
 
@@ -93,7 +95,7 @@ int create_local_socket(int port,int protocol){
 
 void fc_source(int lg,int port,char* adr, int protocol, int nb_message){
 
-	printf("SOURCE: lg_mesg_emis=%d, port=%d, nb_envois=%d, TP=, dest=%s\n",lg,port,30,adr);
+	printf("SOURCE: lg_mesg_emis=%d, port=%d, nb_envois=%d, TP=%d, dest=%s\n",lg,port,30,protocol,adr);
 	int sock;
 	if (protocol==1)
 	{
@@ -123,9 +125,10 @@ void fc_source(int lg,int port,char* adr, int protocol, int nb_message){
 		char motif_tab[26]="abcdefghijklmnopqrstuvwxyz";
 		for (int nb_mess=0;nb_mess<nb_message;nb_mess++)
 		{
-			char motif = motif_tab[(nb_mess+1)%26];
-			construire_message(message,motif,lg,nb_mess);
-			printf("Envoi n°%d (%d) [%s]\n",nb_mess,lg,message);
+			char motif = motif_tab[(nb_mess)%26];
+			construire_message(message,motif,lg,nb_mess+1);
+			printf("Envoi n°%d (%d) ",nb_mess+1,lg);
+			afficher_message(message,lg);
 			if ((sendto(sock,message,lg,0,(struct sockaddr*)&adr_distant,sizeof(adr_distant)))==-1)
 			{	
 				printf("Erreur ça va pas du tout là arrêteeeeeeeeeeeeeee.\n");
@@ -139,22 +142,25 @@ void fc_source(int lg,int port,char* adr, int protocol, int nb_message){
 
 }
 void fc_puits(int lg,int port, int protocol,int nb_message){
-	printf("PUITS: lg_mesg_lu=%d, port=%d, nb_reception= infini, TP=\n",lg,port);
+	printf("PUITS: lg_mesg_lu=%d, port=%d, nb_reception= infini, TP=%d\n",lg,port,protocol);
 	int sock;
-	char* message= (char*)malloc(lg);
+	char* message= malloc(sizeof(char)*30);
 	sock = create_local_socket(port,protocol);
 	struct sockaddr_in src;
 	unsigned int size = sizeof( src );
+	int lg_mess_recep;
 	for (int i=0; i<nb_message;i++)
 	{
-		int lg_mess_recep;
-		if (lg_mess_recep=recvfrom(sock,message,lg,0,(struct sockaddr*)&src, &size )==-1)
+		
+		lg_mess_recep=recvfrom(sock,message,lg,0,(struct sockaddr*)&src, &size );
+		if (lg_mess_recep==-1)
 		{
 			printf("echec de l'écoute\n");
 			exit(1);
 		}
 		else
 		{
+			printf("Reception n°%d (%d) ",i+1,lg_mess_recep);
 			afficher_message(message, lg_mess_recep);
 		}
 	}
@@ -174,7 +180,7 @@ void main (int argc, char **argv)
 	int port = atoi(argv[argc-1]);
 	port = htons(port);
 	char *adr = (argv[argc-2]);
-	int nb_message = -1; /* Nb de messages à envoyer ou à recevoir, par défaut : 10 en émission, infini en réception */
+	int nb_message = 10; /* Nb de messages à envoyer ou à recevoir, par défaut : 10 en émission, infini en réception */
 	int source = -1 ; /* 0=puits, 1=source */
 	while ((c = getopt(argc, argv, "pn:su")) != -1) {
 		switch (c){
