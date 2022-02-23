@@ -24,39 +24,38 @@ données du réseau */
 ////////////////////CONSTRUCTION DU MESSAGE AU FORMAT REQUIS ////////////
 void construire_message(char *message, char motif, int lg, int nb_message) 
 {
-	int i;
-	int nb=nb_message;
-	int fact = 10000;
-	char nbs[10]="0123456789";
-	for (i=0;i<lg;i++) 
+	for (int i=0;i<lg;i++) 
 	{
-		if (i>4)
+		message[i] = motif;
+	}
+}
+
+void afficher_message(char *message, int lg,int nb_mess) 
+{
+	int i;
+    int fact = 10000;
+	char nbs[10]="0123456789";
+	printf("[");
+    int nb=nb_mess;
+	for (i=0;i<lg+5;i++) 
+	{
+        if (i>4)
 		{
-			message[i] = motif;
+			printf("%c", message[i]); 
 		}
 		else 
 		{
 			if ((nb/fact)==0 && nb!=0)
 			{
-				message[i]='-';
+				printf("-");
 			}
 			else 
 			{
-				message[i]=nbs[nb/fact];
+                printf("%c",nbs[nb/fact]);
 				nb=nb%fact;
 			}
 			fact=fact/10;
 		}
-	}
-}
-
-void afficher_message(char *message, int lg) 
-{
-	int i;
-	printf("[");
-	for (i=0;i<lg;i++) 
-	{
-		printf("%c", message[i]); 
 	}
 	printf("]");
 	printf("\n");
@@ -135,7 +134,7 @@ void fc_source(int lg,int port,char* adr, int protocol, int nb_message)
 			char motif = motif_tab[(nb_mess)%26];
 			construire_message(message,motif,lg,nb_mess+1);
 			printf("SOURCE : Envoi n°%d (%d) ",nb_mess+1,lg);
-			afficher_message(message,lg);
+			afficher_message(message,lg,nb_mess+1);
 			if ((sendto(sock,message,lg,0,(struct sockaddr*)&adr_distant,
             sizeof(adr_distant)))==-1)
 			{	
@@ -169,7 +168,7 @@ void fc_source(int lg,int port,char* adr, int protocol, int nb_message)
 	        char motif = motif_tab[(nb_mess)%26];
 			construire_message(message,motif,lg,nb_mess+1);
 			printf("SOURCE : Envoi n°%d (%d) ",nb_mess+1,lg);
-			afficher_message(message,lg);
+			afficher_message(message,lg,nb_mess+1);
 	        if(write(sock, message, lg)==-1)
 	        {
 	            printf("Erreur lors de l'envoi du message \n");
@@ -206,7 +205,7 @@ void fc_puits(int lg,int port, int protocol,int nb_message){
             else
             {
                 printf("PUITS : Reception n°%d (%d) ",i+1,lg_mess_recep);
-                afficher_message(message, lg_mess_recep);
+                afficher_message(message, lg_mess_recep,i+1);
             }
         }
         if (close(sock)==-1)
@@ -232,7 +231,7 @@ void fc_puits(int lg,int port, int protocol,int nb_message){
                 exit(1);
             }
             printf("PUITS : Reception n°%d (%d) ",i+1,lg_mess_recep);
-            afficher_message(message, lg_mess_recep);
+            afficher_message(message, lg_mess_recep,i+1);
         }
         if(shutdown(sock,0)==-1)
         {
