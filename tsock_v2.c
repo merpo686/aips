@@ -73,12 +73,14 @@ int create_local_socket(int port,int protocol){
    
     ///////////////SI UDP ///////////////////
     if (protocol==1)
+	{
         sock = socket(AF_INET, SOCK_DGRAM, 0);
         if (sock == -1)
         {
             printf("échec de création du socket\n") ;
             exit(1);
         }
+	}
     else ////////TCP ///////////
     {
         if ((sock = socket(AF_INET, SOCK_STREAM, 0)) == -1)
@@ -262,7 +264,7 @@ void main (int argc, char **argv)
 	int lg = 30;
 	int port = atoi(argv[argc-1]);
 	char *adr = (argv[argc-2]);
-	int nb_message = -1; /* Nb de messages à envoyer ou à recevoir, par défaut : 10 en émission, infini en réception */
+	int nb_message = 10; /* Nb de messages à envoyer ou à recevoir, par défaut : 10 en émission, infini en réception */
 	int source = -1 ; /* 0=puits, 1=source */
 	while ((c = getopt(argc, argv, "pn:su")) != -1) {
 		switch (c){
